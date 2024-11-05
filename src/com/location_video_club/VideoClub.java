@@ -1,7 +1,9 @@
 package com.location_video_club;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 public class VideoClub {
     private final List<ProduitVideo> produits;
     private final List<Abonnee> abonnees;
@@ -30,11 +32,23 @@ public class VideoClub {
         }
     }
 
-     
+     /**
+      * Ajoute un abonnee dans la liste des abonnees du videoclub
+      * @param abonnee
+      */
     public void ajouterAbonnee(Abonnee abonnee) {
+        if (abonnee == null) {
+            System.out.println("Abonnee vide");
+            return; 
+        }
         this.abonnees.add(abonnee);
     }
 
+    /**
+     * retouver un abonnee par son nom 
+     * @param nom de l'abonnee a rechercher
+     * @return null si l'abonnee n'existe pas sinon retourne l'abonnee
+     */
     public Abonnee trouveerAbonnee(String nom) {
         for (Abonnee abonnee : abonnees) {
             if (abonnee.getNom().equalsIgnoreCase(nom)) {
@@ -43,8 +57,15 @@ public class VideoClub {
         }
         return null;
     }
-
+/**
+ * Ajoute un film dans la liste des films du videoclub
+ * @param film
+ */
      public void ajouterFilm(Film film) {
+        if (film == null) {
+            System.out.println("Film vide");
+            return;
+        }
         this.produits.add(film);
     }
     
@@ -52,17 +73,56 @@ public class VideoClub {
     public void enregistrerPrets(Abonnee abonnee, Film film) {
        System.out.println("rien");
     }   
-
-    public List<Abonnee> extraireAbonneeParRevenu() {
-        return null;    
-    }
+/**
+ * extraire les abonnee dans la meme fourchette
+ * @param diakite
+ * @return null si l'abonnee est vide sinon retourne la liste des abonnee dans la meme fourchette
+ */
+    public List<Abonnee> extraireAbonneeParRevenu(Abonnee diakite) {
+        List<Abonnee> abonnee_dans_meme_fourchette = new ArrayList<Abonnee>();
+        if(diakite == null){
+            System.out.println("l'abonnee est  vide");
+            return null;
+        }
+        for (Abonnee abonnee : abonnees) { 
+            if(abonnee.getFourchette().equals(diakite.getFourchette())){
+                abonnee_dans_meme_fourchette.add(abonnee);
+            }
+        } 
+        return abonnee_dans_meme_fourchette;
+}
 
     public Genre extraireGenrePopulaires() {
         return null;
     }
-
+/**
+ * extraire les films similaire a un film donner
+ * @param titre du film donner
+ * @return liste de film qui sont similaire a notre film
+ */
     public List<Film> extraireFilmSimilaire(String titre) {
-        return null;
+        List<Film> film_plus_similaire=new ArrayList<Film>();
+        List<Film> films = produits.stream()
+            .filter(produit -> produit instanceof Film)
+            .map(produit -> (Film) produit)
+            .collect(Collectors.toList());
+        Film monFilm= films.stream()
+            .filter(film -> film.getTitre().equalsIgnoreCase(titre))
+            .findFirst() 
+            .orElse(null);
+        float[] tab= new float[films.size()];
+        for (Film f : films) {
+            tab[films.indexOf(f)]=monFilm.calculSimilarite(f);
+        }
+        Arrays.sort(tab);
+        for (int i = 0; i < (tab.length/2 )+1/2; i++) {
+            for (Film f : films) {
+                if (tab[i] == f.calculSimilarite(monFilm)) {
+                    film_plus_similaire.add(f);
+                }
+            }
+        }
+        return film_plus_similaire;
     }
 
     public List<Abonnee> extraireAbonneeCurieux() {
