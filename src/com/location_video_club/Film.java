@@ -27,8 +27,54 @@ public class Film extends ProduitVideo{
      * @param film
      */
     public float calculSimilarite(Film film) {
-        return 0;
+                int similarite_genre;
+                int similarite_couleur;
+                int similarite_acteur;
+                if(film==null || (film.getGenre() ==null&&this.getGenre() ==null) ){
+                    return 0;
+                }
+                if(this.getGenre() ==null || film.getGenre() ==null|| this.getActeurs()==null || film.getActeurs()==null){
+                    return 1;
+                } 
+
+            if (this.getGenre().getNom().equals(film.getGenre().getNom())) { similarite_genre=0;}
+            else{
+            int niveau = 0;
+            Genre g1 = this.getGenre();
+            Genre g2 = film.getGenre();
+
+            while (g1 != null || g2 != null) {
+                if (g1 != null && g2 != null && g1.getNom().equals(g2.getNom())) return niveau;
+                
+                if (g1 != null) g1 = g1.getParent();
+                if (g2 != null) g2 = g2.getParent();
+                
+                niveau++;
+            }
+            similarite_genre = niveau;
+        }
+               
+               if(film.getCouleur()==this.getCouleur()){
+                   similarite_couleur=0;
+               } else {similarite_couleur=1;}
+
+               int nombre_acteurs_total=this.getActeurs().size()+film.getActeurs().size();
+               int nombre_acteur_commun=0;
+               for(Acteur acteur : this.getActeurs()){
+                   for(Acteur acteur2 : film.getActeurs()){
+                       if(acteur.equals(acteur2)){
+                           nombre_acteur_commun=nombre_acteur_commun+1;
+                       }
+                   }
+               }
+
+               similarite_acteur=nombre_acteurs_total-nombre_acteur_commun;
+        return similarite_genre+similarite_couleur+similarite_acteur;
+              
     }
+               
+        
+    
 
     @Override
     public String toString() {  

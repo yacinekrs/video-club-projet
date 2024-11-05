@@ -10,7 +10,7 @@ public class Coffret extends ProduitVideo {
      * @param atitre le titre du coffret 
      * @param agenre le genre du coffret 
      * @param aActeurs la listes des acteurs du coffret
-     * @param abonus  le bonus si 1 il ya un bonus sinon 0
+     * @param abonus  le bonus  1 si il ya un bonus sinon 0
      */
     public Coffret(final String atitre, final Genre agenre, final List<Acteur> aActeurs, final boolean abonus, final List<Film> films) {
           
@@ -43,7 +43,18 @@ public class Coffret extends ProduitVideo {
      * @param film 
      */
     public float calculSimilarite(Film film) {
-        return 0;
+        float[] tab=new float[this.films.size()];
+        for (Film f : this.films) {
+            tab[this.films.indexOf(f)]=f.calculSimilarite(film);  
+        }
+        float max = 0;    
+        for (int i = 0; i < tab.length; i++) {
+            if (tab[i] > max) {
+                max = tab[i];
+            }
+        }
+        int bonus = isAbonus() ? 1 : 0;
+        return max+this.films.size()+bonus;
     }
 
     @Override
