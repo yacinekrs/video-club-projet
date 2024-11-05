@@ -3,6 +3,7 @@ package com.location_video_club;
 import java.util.Objects;
 
 public class Genre {
+    private static final Genre GENRE_PARENT = new Genre("Genre", null); // Parent par défaut pour Action et Comédie
     private final String nom;
     private final Genre parent;
     /**
@@ -12,28 +13,32 @@ public class Genre {
      * @throws IllegalArgumentException si les conditions de création du genre ne sont pas respectées.
      */
     public Genre(final String nom, final Genre parent) {
-        // Vérification que 'Action' et 'Comédie' ne doivent pas avoir de parent.
-        if (("Action".equalsIgnoreCase(nom) || "Comédie".equalsIgnoreCase(nom)) && parent != null) {
-            throw new IllegalArgumentException("Le genre " + nom + " ne doit pas avoir de parent.");
-        }
 
-        // Vérification des relations spécifiques entre le genre et son parent.
-        if (("Aventure".equalsIgnoreCase(nom) || "Western".equalsIgnoreCase(nom)) &&
+        // Si 'Action' ou 'Comédie' est créé avec un parent différent de 'Genre', corriger et avertir.
+        if (("Action".equalsIgnoreCase(nom) || "Comédie".equalsIgnoreCase(nom)) && !GENRE_PARENT.equals(parent)) {
+            System.out.println("Avertissement : Le genre '" + nom + "' doit avoir 'Genre' comme parent. " +
+                    "Le parent a été automatiquement défini sur 'Genre'.");
+            this.nom = nom;
+            this.parent = GENRE_PARENT;
+
+        } else if (("Aventure".equalsIgnoreCase(nom) || "Western".equalsIgnoreCase(nom)) &&
                 (parent == null || !"Action".equalsIgnoreCase(parent.nom))) {
+            // Vérification des sous-genres Aventure et Western
             throw new IllegalArgumentException("Le parent du genre " + nom + " doit être 'Action'.");
-        }
-        if (("Musique".equalsIgnoreCase(nom) || "Romance".equalsIgnoreCase(nom)) &&
+
+        } else if (("Musique".equalsIgnoreCase(nom) || "Romance".equalsIgnoreCase(nom)) &&
                 (parent == null || !"Comédie".equalsIgnoreCase(parent.nom))) {
+            // Vérification des sous-genres Musique et Romance
             throw new IllegalArgumentException("Le parent du genre " + nom + " doit être 'Comédie'.");
-        }
 
-        // Vérification que le genre et le parent ne sont pas identiques.
-        if (parent != null && nom.equalsIgnoreCase(parent.nom)) {
+        } else if (parent != null && nom.equalsIgnoreCase(parent.nom)) {
+            // Vérification pour éviter un parent identique au genre
             throw new IllegalArgumentException("Le genre et le parent ne doivent pas être identiques.");
-        }
 
-        this.nom = nom;
-        this.parent = parent;
+        } else {
+            this.nom = nom;
+            this.parent = parent;
+        }
     }
 
     /**
