@@ -16,13 +16,15 @@ public class Film extends ProduitVideo{
     }
 
     /**
-     * Retourne true or false pour la couleur du film
+     * Retourne true or false pour la couleur du film   
+     * @return 
      */
     public boolean getCouleur() {   
         return couleur;          
     }
     /**
-     * Retourne la similarité de deux films
+     * Retourne la similarité de deux films 
+     * @param film
      */
     public float calculSimilarite(Film film) {
         return 0;
