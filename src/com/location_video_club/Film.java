@@ -44,12 +44,13 @@ public class Film extends ProduitVideo{
             Genre g2 = film.getGenre();
 
             while (g1 != null || g2 != null) {
-                if (g1 != null && g2 != null && g1.getNom().equals(g2.getNom())) return niveau;
-                
+                if (g1 != null && g2 != null && g1.getNom().equals(g2.getNom())) {
+                    similarite_genre = niveau;
+                    break;
+                } 
                 if (g1 != null) g1 = g1.getParent();
                 if (g2 != null) g2 = g2.getParent();
-                
-                niveau++;
+                niveau=niveau+1;
             }
             similarite_genre = niveau;
         }
