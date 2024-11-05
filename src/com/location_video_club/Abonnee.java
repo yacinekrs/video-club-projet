@@ -23,7 +23,7 @@ public class Abonnee {
      * @param fourchette Fourchette de l'abonné (Faible, Moyen, Elevée)
      */
     public Abonnee(String nom, String prenom, int age, String sexe, double revenu, Fourchette fourchette) {
-        if (age < 0 && revenu < 0) {
+        if (age <= 0 && revenu < 0) {
             throw new IllegalArgumentException("L'âge et le revenu doit être positif.");
         }
 
@@ -148,7 +148,6 @@ public class Abonnee {
         float simTranche = this.fourchette.equals(autreAbonnee.fourchette)? 0 : 1;
 
         return simAge + simSexe + simTranche;
-
     }
 
 }

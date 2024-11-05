@@ -1,10 +1,12 @@
 package com.location_video_club;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 public class VideoClub {
     private final List<ProduitVideo> produits;
     private final List<Abonnee> abonnees;
+    private final Map<Abonnee,ProduitVideo> prets;
   /**
    * Constructeur pour creer un videoclub nouveau
    */
@@ -28,6 +30,7 @@ public class VideoClub {
         } else {
             this.abonnees = abonnees;
         }
+        this.prets = new HashMap<>();
     }
 
      
@@ -47,18 +50,45 @@ public class VideoClub {
      public void ajouterFilm(Film film) {
         this.produits.add(film);
     }
-    
-    
-    public void enregistrerPrets(Abonnee abonnee, Film film) {
-       System.out.println("rien");
-    }   
+
+
+    /**
+     * Enregistre le prêt d'un film à un abonné.
+     *
+     * Vérifie que l'abonné et le film existent dans les listes respectives avant d'ajouter
+     * l'entrée dans la map des prêts, où l'abonné est la clé et le film est la valeur.
+     *
+     * @param abonnee L'abonné empruntant le film (ne doit pas être null).
+     * @param film    Le film à prêter (ne doit pas être null).
+     */
+    public void enregistrerPret(Abonnee abonnee, Film film) {
+        if (abonnees.contains(abonnee) && produits.contains(film)) {
+            prets.put(abonnee, film);
+        }
+    }
 
     public List<Abonnee> extraireAbonneeParRevenu() {
+
         return null;    
     }
 
     public Genre extraireGenrePopulaires() {
-        return null;
+        Map<ProduitVideo, Integer> compteur = new HashMap<>();
+        int maxNb = 0;
+        Genre genre = null;
+
+        for(Map.Entry<Abonnee,ProduitVideo> entry : prets.entrySet()){
+            ProduitVideo Film = entry.getValue();
+            compteur.put(Film, compteur.getOrDefault(Film, 0) + 1);
+        }
+
+        for(Map.Entry<ProduitVideo, Integer> film : compteur.entrySet()){
+            if (film.getValue() > maxNb) {
+                maxNb = film.getValue();
+                genre = film.getKey().getGenre();
+            }
+        }
+        return genre;
     }
 
     public List<Film> extraireFilmSimilaire(String titre) {
