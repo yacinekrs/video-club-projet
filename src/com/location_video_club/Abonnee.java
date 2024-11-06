@@ -1,8 +1,8 @@
 package com.location_video_club;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.ArrayList;
 
 public class Abonnee {
     private final String nom;
@@ -14,9 +14,10 @@ public class Abonnee {
     private final List<ProduitVideo> produits_louer;
     public enum Sexe {Masculin, Feminin, Autre;}
     public enum Fourchette {Faible, Moyen, Elevee;}
+    
 
     /**
-     *
+     *  Constructeur d'un abonné 
      * @param nom Le Nom de l'abonné
      * @param prenom Le prenom de l'abonné
      * @param age L'age de l'abonné
@@ -42,8 +43,16 @@ public class Abonnee {
         }
     }
 
+    /**
+     * Constructeur d'un abonné sans liste de produit
+     * @param nom nom de l'abonné
+     * @param prenom prenom de l'abonné
+     * @param age age de l'abonné
+     * @param sexe sexe de l'abonné
+     * @param revenu revenu de l'abonné
+     */
     public Abonnee(String nom, String prenom, int age, String sexe, double revenu) {
-        this(nom, prenom, age, sexe, revenu, null );
+        this(nom, prenom, age, sexe, revenu, null);
     }
 
     /**
@@ -95,10 +104,10 @@ public class Abonnee {
     }
 
     /**
-     *
-     * @return La liste des produits loué par l'abonnée
+     * Retourne la liste des produits loué par l'abonné
+     * @return 
      */
-    public List<ProduitVideo> getProduits_louer() {
+    public List<ProduitVideo> getProduits() {
         return produits_louer;
     }
 
@@ -175,6 +184,7 @@ public class Abonnee {
     public float calculerSimilarite(Abonnee autreAbonnee) {
         float simAge = (float) Math.abs(this.age - autreAbonnee.age) / 10 ;
         float simSexe = this.sexe.equals(autreAbonnee.sexe)? 0 : 1;
+
         float simTranche = 0;
         if ((this.fourchette == Fourchette.Faible && autreAbonnee.fourchette == Fourchette.Elevee) ||
                 (this.fourchette == Fourchette.Elevee && autreAbonnee.fourchette == Fourchette.Faible)) {
