@@ -148,7 +148,7 @@ public class Abonnee {
      *         - Moyen : revenu entre 35,001 et 55,000 inclus.
      *         - Élevée : revenu supérieur à 55,000.
      */
-    private Fourchette determinFourchette(double revenu){
+    public static Fourchette determinFourchette(double revenu){
         if (revenu >= 20000 && revenu <= 35000) {
             return Fourchette.Faible;
         } else if (revenu >= 35001 && revenu <= 55000) {
