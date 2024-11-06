@@ -37,14 +37,14 @@ public class Film extends ProduitVideo{
                     return 1;
                 } 
 
-            if (this.getGenre().getNom().equals(film.getGenre().getNom())) { similarite_genre=0;}
+            if (this.getGenre().getNom().equalsIgnoreCase(film.getGenre().getNom())) { similarite_genre=0;}
             else{
             int niveau = 0;
             Genre g1 = this.getGenre();
             Genre g2 = film.getGenre();
 
             while (g1 != null || g2 != null) {
-                if (g1 != null && g2 != null && g1.getNom().equals(g2.getNom())) {
+                if (g1 != null && g2 != null && g1.getNom().equalsIgnoreCase(g2.getNom())) {
                     similarite_genre = niveau;
                     break;
                 } 
@@ -63,7 +63,7 @@ public class Film extends ProduitVideo{
                int nombre_acteur_commun=0;
                for(Acteur acteur : this.getActeurs()){
                    for(Acteur acteur2 : film.getActeurs()){
-                       if(acteur.equals(acteur2)){
+                       if(acteur.getNom().equalsIgnoreCase(acteur2.getNom()) && acteur.getPrenom().equalsIgnoreCase(acteur2.getPrenom())){
                            nombre_acteur_commun=nombre_acteur_commun+1;
                        }
                    }

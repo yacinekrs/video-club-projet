@@ -34,8 +34,15 @@ public class Coffret extends ProduitVideo {
      * ajoute un film a la liste des films du coffret 
      * @param film 
      */
-    public void setFilms(Film film) {
+    public void addFilms(Film film) {
         this.films.add(film);
+    }
+    /**
+     *  
+     * @return la liste des films du coffret
+     */
+    public List<Film> getFilms(){
+        return this.films;
     }
 
     /**
