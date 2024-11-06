@@ -1,5 +1,7 @@
 package com.location_video_club;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Abonnee {
@@ -10,6 +12,7 @@ public class Abonnee {
     private final Sexe sexe;
     private final double revenu;
     private final Fourchette fourchette;
+    private final List<ProduitVideo> produits_louer;
     public enum Sexe {Masculin, Feminin, Autre;}
     public enum Fourchette {Faible, Moyen, Elevee;}
 
@@ -20,9 +23,8 @@ public class Abonnee {
      * @param age L'age de l'abonné
      * @param sexe Sexe de l'abonné (Masculin, Feminin, Autre)
      * @param revenu Le revenue de l'abonné
-     * @param fourchette Fourchette de l'abonné (Faible, Moyen, Elevée)
      */
-    public Abonnee(String nom, String prenom, int age, String sexe, double revenu, Fourchette fourchette) {
+    public Abonnee(String nom, String prenom, int age, String sexe, double revenu, List<ProduitVideo> produits) {
         if (age <= 0 && revenu < 0) {
             throw new IllegalArgumentException("L'âge et le revenu doit être positif.");
         }
@@ -33,6 +35,15 @@ public class Abonnee {
         this.sexe = determinerSexe(sexe);
         this.revenu = revenu;
         this.fourchette = determinFourchette(revenu);
+        if (produits ==  null){
+            this.produits_louer = new ArrayList<ProduitVideo>();
+        } else {
+            this.produits_louer = produits;
+        }
+    }
+
+    public Abonnee(String nom, String prenom, int age, String sexe, double revenu) {
+        this(nom, prenom, age, sexe, revenu, null );
     }
 
     /**
@@ -82,27 +93,12 @@ public class Abonnee {
         return fourchette;
     }
 
-    @Override
-    public String toString() {
-        return "Abonnee{" +
-                "nom='" + nom + '\'' +
-                ", prenom='" + prenom + '\'' +
-                ", age=" + age +
-                ", sexe=" + sexe +
-                ", fourchette=" + fourchette +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Abonnee abonnee)) return false;
-        return age == abonnee.age && Objects.equals(nom, abonnee.nom) && Objects.equals(prenom, abonnee.prenom) && sexe == abonnee.sexe && fourchette == abonnee.fourchette;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(nom, prenom, age, sexe, fourchette);
+    /**
+     *
+     * @return La liste des produits loué par l'abonnée
+     */
+    public List<ProduitVideo> getProduits_louer() {
+        return produits_louer;
     }
 
     /**
@@ -133,6 +129,15 @@ public class Abonnee {
         }
     }
 
+    /**
+     * Détermine la fourchette de revenu en fonction d'un montant donné.
+     *
+     * @param revenu Le montant du revenu à analyser.
+     * @return La fourchette de revenu : Faible, Moyen ou Élevée.
+     *         - Faible : revenu entre 20,000 et 35,000 inclus.
+     *         - Moyen : revenu entre 35,001 et 55,000 inclus.
+     *         - Élevée : revenu supérieur à 55,000.
+     */
     private Fourchette determinFourchette(double revenu){
         if (revenu >= 20000 && revenu <= 35000) {
             return Fourchette.Faible;
@@ -142,6 +147,30 @@ public class Abonnee {
             return Fourchette.Elevee;
         }
     }
+
+    /**
+     * Ajoute un produit à la liste des produits loués par cet abonné.
+     * @param produit Le produit vidéo à ajouter à la liste des locations de l'abonné.
+     */
+    public  void louerProduit(ProduitVideo produit){
+        this.produits_louer.add(produit);
+    }
+
+    /**
+     * Retire un produit de la liste des produits loués par cet abonné.
+     * @param produit Le produit vidéo à retirer de la liste des locations de l'abonné.
+     */
+    public  void rendreProduit(ProduitVideo produit){
+        this.produits_louer.remove(produit);
+    }
+
+    /**
+     * Calcule la similarité entre cet abonné et un autre abonné selon
+     * l'âge, le sexe et la tranche de revenu.
+     *
+     * @param autreAbonnee L'abonné à comparer.
+     * @return Score de similarité, plus faible pour plus de ressemblance.
+     */
     public float calculerSimilarite(Abonnee autreAbonnee) {
         float simAge = Math.abs(this.age - autreAbonnee.age) / 10 ;
         float simSexe = this.sexe.equals(autreAbonnee.sexe)? 0 : 1;
@@ -149,5 +178,26 @@ public class Abonnee {
 
         return simAge + simSexe + simTranche;
     }
+    @Override
+    public String toString() {
+        return "Abonnee{" +
+                "nom='" + nom + '\'' +
+                ", prenom='" + prenom + '\'' +
+                ", age=" + age +
+                ", sexe=" + sexe +
+                ", fourchette=" + fourchette +
+                '}';
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Abonnee abonnee)) return false;
+        return age == abonnee.age && Objects.equals(nom, abonnee.nom) && Objects.equals(prenom, abonnee.prenom) && sexe == abonnee.sexe && fourchette == abonnee.fourchette;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nom, prenom, age, sexe, fourchette);
+    }
 }

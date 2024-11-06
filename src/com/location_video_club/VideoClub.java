@@ -6,7 +6,7 @@ import java.util.Map;
 public class VideoClub {
     private final List<ProduitVideo> produits;
     private final List<Abonnee> abonnees;
-    private final Map<Abonnee,ProduitVideo> prets;
+
   /**
    * Constructeur pour creer un videoclub nouveau
    */
@@ -30,7 +30,6 @@ public class VideoClub {
         } else {
             this.abonnees = abonnees;
         }
-        this.prets = new HashMap<>();
     }
 
      
@@ -62,9 +61,6 @@ public class VideoClub {
      * @param film    Le film à prêter (ne doit pas être null).
      */
     public void enregistrerPret(Abonnee abonnee, Film film) {
-        if (abonnees.contains(abonnee) && produits.contains(film)) {
-            prets.put(abonnee, film);
-        }
     }
 
     public List<Abonnee> extraireAbonneeParRevenu() {
@@ -73,22 +69,28 @@ public class VideoClub {
     }
 
     public Genre extraireGenrePopulaires() {
-        Map<ProduitVideo, Integer> compteur = new HashMap<>();
+        Map<Genre, Integer> compteur = new HashMap<>();
         int maxNb = 0;
-        Genre genre = null;
+        Genre genrePopulaire = null;
 
-        for(Map.Entry<Abonnee,ProduitVideo> entry : prets.entrySet()){
-            ProduitVideo Film = entry.getValue();
-            compteur.put(Film, compteur.getOrDefault(Film, 0) + 1);
-        }
+        for (Abonnee a : abonnees) {
+            List<ProduitVideo> listProduitsVideo = a.getProduits_louer();
 
-        for(Map.Entry<ProduitVideo, Integer> film : compteur.entrySet()){
-            if (film.getValue() > maxNb) {
-                maxNb = film.getValue();
-                genre = film.getKey().getGenre();
+            // Parcourt chaque produit vidéo loué par cet abonné
+            for (ProduitVideo produit : listProduitsVideo) {
+                // Récupère le genre du produit vidéo et incrémente son compteur dans la map
+                Genre genre = produit.getGenre();
+                compteur.put(genre, compteur.getOrDefault(genre, 0) + 1);
             }
         }
-        return genre;
+
+        for (Map.Entry<Genre, Integer> entry : compteur.entrySet()) {
+            if (entry.getValue() > maxNb) {
+                maxNb = entry.getValue();
+                genrePopulaire = entry.getKey();
+            }
+        }
+        return genrePopulaire;
     }
 
     public List<Film> extraireFilmSimilaire(String titre) {
@@ -99,11 +101,48 @@ public class VideoClub {
         return null;
     }
 
-    public List<Abonnee> extraireAbonneeProche() {
-        return null;
+    public List<Film> extraireFilmsPublicType(float seuil) {
+        Map<Film, List<Abonnee>> filmsAbonnesMap = new HashMap<>();
+        List<Film> filmsPublicType = new ArrayList<>();
+
+        for (Abonnee a : abonnees) {
+            List<ProduitVideo> listProduitsVideo = a.getProduits_louer();
+            for (ProduitVideo produit : listProduitsVideo) {
+                if (produit instanceof Film) {
+                    Film film = (Film) produit;
+                    filmsAbonnesMap.putIfAbsent(film, new ArrayList<>());
+                    filmsAbonnesMap.get(film).add(a);
+                }
+            }
+        }
+
+        for (Map.Entry<Film, List<Abonnee>> entry : filmsAbonnesMap.entrySet()) {
+            float similariteTotale = 0;
+            List<Abonnee> listAbonnee = entry.getValue();
+
+            // Si le film a moins de deux abonnés, on ne peut pas calculer de similarité
+            if (listAbonnee.size() < 2) {
+                continue;
+            }
+
+            for (int i = 0; i < listAbonnee.size(); i++) {
+                Abonnee ab1 = listAbonnee.get(i);  // Premier abonné
+                for (int j = i + 1; j < listAbonnee.size(); j++) {
+                    Abonnee ab2 = listAbonnee.get(j);  // Deuxième abonné
+                    similariteTotale += ab1.calculerSimilarite(ab2);
+                }
+            }
+            float moyenneSimilarite = similariteTotale / listAbonnee.size();
+
+            if (moyenneSimilarite < seuil) {
+                filmsPublicType.add(entry.getKey());
+            }
+        }
+        return filmsPublicType;
     }
 
-    public List<Film> extraireFilmsPublicType(float type) {
+
+    public List<Abonnee> extraireAbonneProche() {
         return null;
     }
 
