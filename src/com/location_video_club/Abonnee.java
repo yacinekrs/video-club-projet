@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class Abonnee {
-
     private final String nom;
     private final String prenom;
     private final int age;
@@ -35,6 +34,7 @@ public class Abonnee {
         this.sexe = determinerSexe(sexe);
         this.revenu = revenu;
         this.fourchette = determinFourchette(revenu);
+
         if (produits ==  null){
             this.produits_louer = new ArrayList<ProduitVideo>();
         } else {
@@ -61,6 +61,7 @@ public class Abonnee {
     public String getPrenom() {
         return prenom;
     }
+
     /**
      *
      * @return un entier représentant l'âge de l'abonné.
@@ -172,12 +173,16 @@ public class Abonnee {
      * @return Score de similarité, plus faible pour plus de ressemblance.
      */
     public float calculerSimilarite(Abonnee autreAbonnee) {
-        float simAge = Math.abs(this.age - autreAbonnee.age) / 10 ;
+        float simAge = (float) Math.abs(this.age - autreAbonnee.age) / 10 ;
         float simSexe = this.sexe.equals(autreAbonnee.sexe)? 0 : 1;
-        float simTranche = this.fourchette.equals(autreAbonnee.fourchette)? 0 : 1;
-
+        float simTranche = 0;
+        if ((this.fourchette == Fourchette.Faible && autreAbonnee.fourchette == Fourchette.Elevee) ||
+                (this.fourchette == Fourchette.Elevee && autreAbonnee.fourchette == Fourchette.Faible)) {
+            simTranche = 1;
+        }
         return simAge + simSexe + simTranche;
     }
+
     @Override
     public String toString() {
         return "Abonnee{" +
