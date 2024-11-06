@@ -3,7 +3,7 @@ package com.location_video_club;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProduitVideo {
+public abstract class  ProduitVideo {
     protected final String titre;
     protected final Genre genre;
     protected final List<Acteur> acteurs;
@@ -44,7 +44,7 @@ public class ProduitVideo {
      * Ajoute un acteur au produit
      * @param aActeurs
      */
-    public void setActeurs(final Acteur aActeurs) { this.acteurs.add(aActeurs); }
+    public void addActeurs(final Acteur aActeurs) { this.acteurs.add(aActeurs); }
     
     @Override
     public String toString() {  

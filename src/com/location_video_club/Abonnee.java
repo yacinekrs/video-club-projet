@@ -1,6 +1,8 @@
 package com.location_video_club;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.ArrayList;
 
 public class Abonnee {
 
@@ -12,17 +14,19 @@ public class Abonnee {
     private final Fourchette fourchette;
     public enum Sexe {Masculin, Feminin, Autre;}
     public enum Fourchette {Faible, Moyen, Elevee;}
+    public final List<ProduitVideo> produits_louer;
 
     /**
-     *
+     *  Constructeur d'un abonné 
      * @param nom Le Nom de l'abonné
      * @param prenom Le prenom de l'abonné
      * @param age L'age de l'abonné
      * @param sexe Sexe de l'abonné (Masculin, Feminin, Autre)
      * @param revenu Le revenue de l'abonné
      * @param fourchette Fourchette de l'abonné (Faible, Moyen, Elevée)
+     * @param produits La liste des produits loué par l'abonné
      */
-    public Abonnee(String nom, String prenom, int age, String sexe, double revenu, Fourchette fourchette) {
+    public Abonnee(String nom, String prenom, int age, String sexe, double revenu,List<ProduitVideo> produits) {
         if (age < 0 && revenu < 0) {
             throw new IllegalArgumentException("L'âge et le revenu doit être positif.");
         }
@@ -33,7 +37,27 @@ public class Abonnee {
         this.sexe = determinerSexe(sexe);
         this.revenu = revenu;
         this.fourchette = determinFourchette(revenu);
+        if(produits == null) {
+            this.produits_louer = new ArrayList<ProduitVideo>();  
+        } else {
+            this.produits_louer = produits;
+        }
     }
+
+/**
+ * Constructeur d'un abonné sans liste de produit
+ * @param nom nom de l'abonné
+ * @param prenom prenom de l'abonné
+ * @param age age de l'abonné
+ * @param sexe sexe de l'abonné
+ * @param revenu revenu de l'abonné
+ * @param fourchette  fourchette de l'abonné
+ */
+    public Abonnee(String nom, String prenom, int age, String sexe, double revenu) {
+        this(nom, prenom, age, sexe, revenu, null);
+    }
+
+
 
     /**
      *
@@ -80,6 +104,27 @@ public class Abonnee {
      */
     public Fourchette getFourchette() {
         return fourchette;
+    }
+    /**
+     * Ajoute un produit dans la liste des produits loué par l'abonné
+     * @param produit
+     */
+  public void louerProduit(ProduitVideo produit) {
+      this.produits_louer.add(produit); 
+  }
+  /**
+   *  Retire un produit de la liste des produits loué par l'abonné
+   * @param produit
+   */
+  public void rendreProduit(ProduitVideo produit) {
+      this.produits_louer.remove(produit);
+  }
+    /**
+     * Retourne la liste des produits loué par l'abonné
+     * @return 
+     */
+    public List<ProduitVideo> getProduits() {
+        return produits_louer;
     }
 
     @Override
@@ -146,7 +191,6 @@ public class Abonnee {
         float simAge = Math.abs(this.age - autreAbonnee.age) / 10 ;
         float simSexe = this.sexe.equals(autreAbonnee.sexe)? 0 : 1;
         float simTranche = this.fourchette.equals(autreAbonnee.fourchette)? 0 : 1;
-
         return simAge + simSexe + simTranche;
 
     }
