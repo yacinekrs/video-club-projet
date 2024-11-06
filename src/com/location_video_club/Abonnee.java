@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.ArrayList;
 
 public class Abonnee {
-
     private final String nom;
     private final String prenom;
     private final int age;
@@ -36,6 +35,7 @@ public class Abonnee {
         this.sexe = determinerSexe(sexe);
         this.revenu = revenu;
         this.fourchette = determinFourchette(revenu);
+
         if (produits ==  null){
             this.produits_louer = new ArrayList<ProduitVideo>();
         } else {
@@ -50,7 +50,6 @@ public class Abonnee {
      * @param age age de l'abonné
      * @param sexe sexe de l'abonné
      * @param revenu revenu de l'abonné
-     * @param fourchette  fourchette de l'abonné
      */
     public Abonnee(String nom, String prenom, int age, String sexe, double revenu) {
         this(nom, prenom, age, sexe, revenu, null);
@@ -149,7 +148,7 @@ public class Abonnee {
      *         - Moyen : revenu entre 35,001 et 55,000 inclus.
      *         - Élevée : revenu supérieur à 55,000.
      */
-    private Fourchette determinFourchette(double revenu){
+    public static Fourchette determinFourchette(double revenu){
         if (revenu >= 20000 && revenu <= 35000) {
             return Fourchette.Faible;
         } else if (revenu >= 35001 && revenu <= 55000) {
@@ -183,12 +182,17 @@ public class Abonnee {
      * @return Score de similarité, plus faible pour plus de ressemblance.
      */
     public float calculerSimilarite(Abonnee autreAbonnee) {
-        float simAge = Math.abs(this.age - autreAbonnee.age) / 10 ;
+        float simAge = (float) Math.abs(this.age - autreAbonnee.age) / 10 ;
         float simSexe = this.sexe.equals(autreAbonnee.sexe)? 0 : 1;
-        float simTranche = this.fourchette.equals(autreAbonnee.fourchette)? 0 : 1;
+
+        float simTranche = 0;
+        if ((this.fourchette == Fourchette.Faible && autreAbonnee.fourchette == Fourchette.Elevee) ||
+                (this.fourchette == Fourchette.Elevee && autreAbonnee.fourchette == Fourchette.Faible)) {
+            simTranche = 1;
+        }
         return simAge + simSexe + simTranche;
     }
-    
+
     @Override
     public String toString() {
         return "Abonnee{" +

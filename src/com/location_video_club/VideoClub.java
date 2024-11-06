@@ -1,44 +1,33 @@
 package com.location_video_club;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 public class VideoClub {
     private final List<ProduitVideo> produits;
     private final List<Abonnee> abonnees;
 
-  /**
-   * Constructeur pour creer un videoclub nouveau
-   */
+    /**
+     *  Constructeur pour creer un nouveau videoclub
+     */
     public VideoClub() {
         this(null, null);
     }
 
     /**
      * Constructeur pour creer un videoclub existant
-     * @param produits la listes des produits video 
+     *
+     * @param produits la listes des produits video
      * @param abonnees la liste des abonnees
      */
     public VideoClub(List<ProduitVideo> produits, List<Abonnee> abonnees) {
-       if (produits == null) {
-            this.produits = new ArrayList<ProduitVideo>();
-        } else {
-            this.produits = produits;
-        }
-        if (abonnees == null) {
-            this.abonnees = new ArrayList<Abonnee>();
-        } else {
-            this.abonnees = abonnees;
-        }
+        this.produits = Objects.requireNonNullElseGet(produits, ArrayList::new);
+        this.abonnees = Objects.requireNonNullElseGet(abonnees, ArrayList::new);
     }
 
-     /**
-      * Ajoute un abonnee dans la liste des abonnees du videoclub
-      * @param abonnee
-      */
+    /**
+     * Ajoute un abonné à la liste des abonnés du VideoClub.
+     *
+     * @param abonnee L'abonné à ajouter.
+     */
     public void ajouterAbonnee(Abonnee abonnee) {
         if (abonnee == null) {
             System.out.println("Abonnee vide");
@@ -48,9 +37,10 @@ public class VideoClub {
     }
 
     /**
-     * retouver un abonnee par son nom 
-     * @param nom de l'abonnee a rechercher
-     * @return null si l'abonnee n'existe pas sinon retourne l'abonnee
+     * Recherche un abonné par son nom.
+     *
+     * @param nom Le nom de l'abonné à rechercher.
+     * @return L'abonné correspondant au nom, ou null si non trouvé.
      */
     public Abonnee trouveerAbonnee(String nom) {
         for (Abonnee abonnee : abonnees) {
@@ -60,10 +50,12 @@ public class VideoClub {
         }
         return null;
     }
-/**
- * Ajoute un film dans la liste des films du videoclub
- * @param film
- */
+
+    /**
+     * Ajoute un film à la liste des films du vidéoclub.
+     *
+     * @param film Le film à ajouter.
+     */
      public void ajouterFilm(Film film) {
         if (film == null) {
             System.out.println("Film vide");
@@ -71,11 +63,14 @@ public class VideoClub {
         }
         this.produits.add(film);
     }
-    
+
     /**
-     * enregistrer un pret d'un film par un abonnee
-     * @param abonnee
-     * @param film
+     * Enregistre un prêt de film effectué par un abonné.
+     * Ajoute le film à la liste des produits loués par l'abonné.
+     * Si le film n'est pas trouvé dans la liste des films du vidéoclub, affiche un message d'erreur.
+     *
+     * @param abonnee L'abonné qui loue le film.
+     * @param film Le film à louer.
      */
     public void enregistrerPrets(Abonnee abonnee, Film film) {
         if(abonnee ==null) {
@@ -101,27 +96,31 @@ public class VideoClub {
           }
         }
         System.out.println("Film introuvable");
-    }   
+    }
 
-/**
- * extraire les abonnee dans la meme fourchette de revenu
- * @param diakite
- * @return null si l'abonnee est vide sinon retourne la liste des abonnee dans la meme fourchette
- */
-    public List<Abonnee> extraireAbonneeParRevenu(Abonnee diakite) {
-        List<Abonnee> abonnee_dans_meme_fourchette = new ArrayList<Abonnee>();
-        if(diakite == null){
-            System.out.println("l'abonnee est  vide");
-            return null;
-        }
-        for (Abonnee abonnee : abonnees) { 
-            if(abonnee.getFourchette().equals(diakite.getFourchette())){
-                abonnee_dans_meme_fourchette.add(abonnee);
+    /**
+     * Extrait les abonnés dont la fourchette de revenu correspond à celle du revenu spécifié.
+     *
+     * @param revenu Revenu pour déterminer la fourchette cible.
+     * @return Liste des abonnés ayant une fourchette de revenu correspondante.
+     */
+    public List<Abonnee> extraireAbonneeParRevenu(double revenu) {
+        List<Abonnee> abonneesCorrespondants  = new ArrayList<Abonnee>();
+        Abonnee.Fourchette fourchetteCible = Abonnee.determinFourchette(revenu);
+
+        for (Abonnee abonnee : abonnees) {
+            if(abonnee.getFourchette().equals(fourchetteCible)){
+                abonneesCorrespondants .add(abonnee);
             }
-        } 
-        return abonnee_dans_meme_fourchette;
-}
+        }
+        return abonneesCorrespondants ;
+    }
 
+    /**
+     * Détermine le genre le plus populaire parmi les produits loués par les abonnés.
+     *
+     * @return Le genre le plus fréquemment loué par les abonnés.
+     */
     public Genre extraireGenrePopulaires() {
         Map<Genre, Integer> compteur = new HashMap<>();
         int maxNb = 0;
@@ -148,9 +147,12 @@ public class VideoClub {
     }
 
     /**
-     * extraire les films similaire a un film  de titre donner
-     * @param titre du film donner
-     * @return liste de film qui sont similaire a notre titre de film
+     * Extrait les films similaires à un film donné par son titre.
+     * Calcule la similarité entre chaque film de la liste et le film recherché,
+     * puis retourne une liste des films les plus similaires.
+     *
+     * @param titre Le titre du film pour lequel on cherche des films similaires.
+     * @return Liste de films similaires au film donné, basée sur un calcul de similarité.
      */
     public List<Film> extraireFilmSimilaire(String titre) {
         List<Film> film_plus_similaire=new ArrayList<Film>();
@@ -178,10 +180,13 @@ public class VideoClub {
     }
 
     /**
-   * extraire les abonnees curieux 
-   * @return liste d'abonnee curieux
-   */
- public List<Abonnee> extraireAbonneeCurieux() {
+     * Extrait la liste des abonnés les plus curieux, c'est-à-dire ceux ayant la plus grande diversité
+     * dans les films qu'ils louent, en comparant la similarité entre leurs films.
+     * Un abonné est considéré comme curieux s'il loue des films très différents les uns des autres.
+     *
+     * @return La liste des abonnés avec le score de diversité minimum (les plus curieux).
+     */
+    public List<Abonnee> extraireAbonneeCurieux() {
         List<Abonnee> abonneesCurieux = new ArrayList<>();
         Map<Abonnee, Double> diversiteScores = new HashMap<>();
         
@@ -219,35 +224,35 @@ public class VideoClub {
         
         return abonneesCurieux;
     }
-    /**
-     *  nous permet de calaculer la score de diversite de similarite 
-     * @param film_louer_abonnee
-     * @return Un score plus bas indique une plus grande diversité
-     */
 
+    /**
+     * Calcule un score de diversité de similarité entre une liste de films.
+     * Le score est plus bas lorsque les films sont plus diversifiés (moins similaires).
+     *
+     * @param film_louer_abonnee Liste des films loués par un abonné.
+     * @return Un score de diversité : plus le score est bas, plus les films sont diversifiés.
+     */
     private double calculerScoreDiversite(List<Film> film_louer_abonnee) {
         double scoreTotalSimilarite = 0;
         int comparaisons = 0;
         
         for (int i = 0; i < film_louer_abonnee.size(); i++) {
             for (int j = i + 1; j < film_louer_abonnee.size(); j++) {
-    
-                    Film film1 = film_louer_abonnee.get(i);
-                    Film film2 =  film_louer_abonnee.get(j);
-                    scoreTotalSimilarite += film1.calculSimilarite(film2);
-                    comparaisons++;
-                
+                Film film1 = film_louer_abonnee.get(i);
+                Film film2 =  film_louer_abonnee.get(j);
+                scoreTotalSimilarite += film1.calculSimilarite(film2);
+                comparaisons++;
             }
         }
-        
         return comparaisons > 0 ? scoreTotalSimilarite / comparaisons : Double.MAX_VALUE; 
     }
+
     /**
-     * permet d'extraire les abonees  proches par rapport a la simularite
-     * Calculer la similarité entre chaque abonné et le profiltype
-     * Trier les abonnés par similarité (du plus similaire au moins similaire)
-     * @param profilType  l'abonne en entree
-     * @return liste  d'abonees qui sont proches
+     * Extrait les abonnés proches d'un profil donné en fonction de leur similarité.
+     * Trie les abonnés par similarité (du plus similaire au moins similaire).
+     *
+     * @param profilType L'abonné de référence avec lequel comparer les autres.
+     * @return Une liste d'abonnés triés par similarité croissante avec le profil donné.
      */
     public List<Abonnee> extraireAbonneeProche(Abonnee profilType) {
         if (profilType == null) {
@@ -265,7 +270,12 @@ public class VideoClub {
             .collect(Collectors.toList());
             return abonnesProches;
     }
-
+    /**
+     * Extrait les films dont la similarité moyenne entre les abonnés est inférieure au seuil spécifié.
+     *
+     * @param seuil La similarité moyenne en dessous de laquelle un film est sélectionné.
+     * @return Liste des films correspondant au critère de similarité.
+     */
     public List<Film> extraireFilmsPublicType(float seuil) {
         Map<Film, List<Abonnee>> filmsAbonnesMap = new HashMap<>();
         List<Film> filmsPublicType = new ArrayList<>();
@@ -290,9 +300,9 @@ public class VideoClub {
             }
 
             for (int i = 0; i < listAbonnee.size(); i++) {
-                Abonnee ab1 = listAbonnee.get(i);  // Premier abonné
+                Abonnee ab1 = listAbonnee.get(i);
                 for (int j = i + 1; j < listAbonnee.size(); j++) {
-                    Abonnee ab2 = listAbonnee.get(j);  // Deuxième abonné
+                    Abonnee ab2 = listAbonnee.get(j);
                     similariteTotale += ab1.calculerSimilarite(ab2);
                 }
             }
@@ -305,23 +315,25 @@ public class VideoClub {
         return filmsPublicType;
     }
 
-/**
- * 
- * @return une map de chaque  produit suivie de leur film similaire
- */
-  public Map<ProduitVideo, List<Film>> extraireProduitSimilaire() {
+    /**
+     * Extrait les produits vidéo similaires à chaque produit dans la liste.
+     *
+     * Pour chaque produit, cela retourne une liste des films similaires.
+     * @return Une carte associant chaque produit vidéo à une liste de films similaires.
+     */
+    public Map<ProduitVideo, List<Film>> extraireProduitSimilaire() {
         Map<ProduitVideo, List<Film>> produitsSimilaires = new HashMap<>();
-        
+
         // Récupérer tous les films de la liste des produits
         List<Film> films = produits.stream()
             .filter(produit -> produit instanceof Film)
             .map(produit -> (Film) produit)
             .collect(Collectors.toList());
-    
+
         // Pour chaque produit vidéo, déterminer les films similaires
         for (ProduitVideo produit : produits) {
             List<Film> filmsSimilaires = new ArrayList<>();
-            
+
             if (produit instanceof Film) {
                 Film filmActuel = (Film) produit;
                 filmsSimilaires = trouverFilmsSimilaires(filmActuel, films);
@@ -331,19 +343,19 @@ public class VideoClub {
                     filmsSimilaires.addAll(trouverFilmsSimilaires(film, films));
                 }
             }
-            
+
             produitsSimilaires.put(produit, filmsSimilaires);
         }
-    
+
         return produitsSimilaires;
     }
-    
-/**
- * elle va nous permettre de trouver les films similaire
- * @param film
- * @param tousLesFilms
- * @return liste de ces films
- */
+
+    /**
+     * Retourne les films similaires à un film donné, triés par similarité croissante.
+     * @param film Le film de référence.
+     * @param tousLesFilms Liste de tous les films à comparer.
+     * @return Liste de films similaires.
+     */
     private List<Film> trouverFilmsSimilaires(Film film, List<Film> tousLesFilms) {
         return tousLesFilms.stream()
             .filter(f -> !f.equals(film)) // Exclure le film lui-même
@@ -355,35 +367,16 @@ public class VideoClub {
     public String toString() {
         return "VideoClub [produits=" + produits + ", abonnees=" + abonnees + "]";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof VideoClub videoClub)) return false;
+        return Objects.equals(produits, videoClub.produits) && Objects.equals(abonnees, videoClub.abonnees);
+    }
+
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((abonnees == null) ? 0 : abonnees.hashCode());
-        result = prime * result + ((produits == null) ? 0 : produits.hashCode());
-        return result;
+        return Objects.hash(produits, abonnees);
     }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        VideoClub other = (VideoClub) obj;
-        if (abonnees == null) {
-            if (other.abonnees != null)
-                return false;
-        } else if (!abonnees.equals(other.abonnees))
-            return false;
-        if (produits == null) { 
-            if (other.produits != null)
-                return false;
-        } else if (!produits.equals(other.produits))
-            return false;    
-        return true;            
-    }
-    
 }
