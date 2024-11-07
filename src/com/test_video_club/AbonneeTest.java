@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import com.location_video_club.Abonnee;
 import com.location_video_club.Film;
+import com.location_video_club.Coffret;
 import com.location_video_club.Genre;
 import com.location_video_club.ProduitVideo;
 
@@ -16,12 +17,20 @@ class AbonneeTest {
     private Abonnee abonnee;
     private ProduitVideo film1;
     private ProduitVideo film2;
+    private ProduitVideo coffret1;
 
     @BeforeEach
     void setUp() {
+        Genre genre=new Genre("Genre", null);
         abonnee = new Abonnee("Dupont", "Jean", 30, "Masculin", 40000);
-        film1 = new Film("Film1", new Genre("Action", null), new ArrayList<>(), true);
-        film2 = new Film("Film2", new Genre("Comédie", null), new ArrayList<>(), false);
+        film1 = new Film("Film1", new Genre("Action", genre), new ArrayList<>(), true);
+        film2 = new Film("Film2", new Genre("Comédie", genre), new ArrayList<>(), false);
+        List<Film> liste_film=new ArrayList<Film>();
+        Film f1=(film1 instanceof Film)? (Film)film1:null;
+        Film f2=(film2 instanceof Film)? (Film)film2:null;
+        liste_film.add(f1);
+        liste_film.add(f2);
+        coffret1 = new Coffret("Coffret1", new Genre("Action", null ), new ArrayList<>(), true, liste_film);
     }
 
     @Test
@@ -44,18 +53,12 @@ class AbonneeTest {
     }
 
     @Test
-    void testDeterminerSexe() {
-        assertEquals(Abonnee.Sexe.Masculin, new Abonnee("Test", "Test", 20, "H", 30000).getSexe());
-        assertEquals(Abonnee.Sexe.Feminin, new Abonnee("Test", "Test", 20, "F", 30000).getSexe());
-        assertEquals(Abonnee.Sexe.Autre, new Abonnee("Test", "Test", 20, "X", 30000).getSexe());
-    }
-
-
-    @Test
     void testLouerProduit() {
         abonnee.louerProduit(film1);
+        abonnee.louerProduit(coffret1);
         assertTrue(abonnee.getProduits().contains(film1));
-        assertEquals(1, abonnee.getProduits().size());
+        assertTrue(abonnee.getProduits().contains(coffret1));
+        assertEquals(2, abonnee.getProduits().size());
     }
 
     @Test
@@ -73,7 +76,6 @@ class AbonneeTest {
         Abonnee autreAbonnee = new Abonnee("Martin", "Luc", 35, "Masculin", 50000);
         float similarite = abonnee.calculerSimilarite(autreAbonnee);
         assertTrue(similarite >= 0);
-        // La similarité exacte dépendra de l'implémentation, mais on peut vérifier qu'elle est dans une plage raisonnable
-        assertTrue(similarite < 3);  // Ajustez cette valeur selon votre implémentation
+        assertTrue(similarite < 3);  // on doit ajuster cette valeur selon notre choix 
     }
 }

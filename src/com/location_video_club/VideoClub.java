@@ -160,6 +160,7 @@ public class VideoClub {
             .filter(produit -> produit instanceof Film)
             .map(produit -> (Film) produit)
             .collect(Collectors.toList());
+            
         Film monFilm= films.stream()
             .filter(film -> film.getTitre().equalsIgnoreCase(titre))
             .findFirst() 
@@ -169,7 +170,7 @@ public class VideoClub {
             tab[films.indexOf(f)]=monFilm.calculSimilarite(f);
         }
         Arrays.sort(tab);
-        for (int i = 0; i < (tab.length/2 )+1/2; i++) {
+        for (int i = 0; i < Math.ceil(tab.length/2); i++) {
             for (Film f : films) {
                 if (tab[i] == f.calculSimilarite(monFilm)) {
                     film_plus_similaire.add(f);

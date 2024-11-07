@@ -1,6 +1,4 @@
 package com.location_video_club;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class  ProduitVideo {
@@ -15,13 +13,14 @@ public abstract class  ProduitVideo {
   */
     public ProduitVideo(final String  atitre, final Genre agenre, final List<Acteur> aActeurs) {
         this.titre = atitre;
-        this.genre = agenre;
+        if (agenre == null) {
+            throw new IllegalArgumentException("Le genre ne peut pas être null");
+        }
         if (aActeurs == null) {
-            this.acteurs = new ArrayList<Acteur>();
+            throw new IllegalArgumentException("La liste des acteurs ne peut pas être null");
         }
-        else {      
-            this.acteurs = aActeurs;
-        }
+        this.genre = agenre;
+        this.acteurs = aActeurs;
     }
 
 
