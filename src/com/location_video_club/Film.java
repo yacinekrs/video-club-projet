@@ -8,7 +8,7 @@ public class Film extends ProduitVideo{
      * @param atitre le titre du film
      * @param agenre le genre du film
      * @param aActeurs la liste des acteurs
-     * @param acouleur la couleur du film si c'est 1 le film est en couleur sinon c'estv noir&blanc
+     * @param acouleur la couleur du film si c'est true le film est en couleur sinon c'est en  noir&blanc
      */
     public Film(final String atitre, final Genre agenre, final List<Acteur> aActeurs, final boolean acouleur) {
         super(atitre, agenre, aActeurs);
