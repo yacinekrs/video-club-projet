@@ -22,60 +22,53 @@ public class Film extends ProduitVideo{
     public boolean getCouleur() {   
         return couleur;          
     }
+
     /**
      * Retourne la similarité de deux films 
      * @param film
      */
     public float calculSimilarite(Film film) {
-                int similarite_genre;
-                int similarite_couleur;
-                int similarite_acteur;
-                if(film==null || (film.getGenre() ==null&&this.getGenre() ==null) ){
-                    return 0;
-                }
-                if(this.getGenre() ==null || film.getGenre() ==null|| this.getActeurs()==null || film.getActeurs()==null){
-                    return 1;
-                } 
-
-            if (this.getGenre().getNom().equalsIgnoreCase(film.getGenre().getNom())) { similarite_genre=0;}
-            else{
-            int niveau = 0;
-            Genre g1 = this.getGenre();
-            Genre g2 = film.getGenre();
-
-            while (g1 != null || g2 != null) {
-                if (g1 != null && g2 != null && g1.getNom().equalsIgnoreCase(g2.getNom())) {
-                    similarite_genre = niveau;
-                    break;
-                } 
-                if (g1 != null) g1 = g1.getParent();
-                if (g2 != null) g2 = g2.getParent();
-                niveau=niveau+1;
-            }
-            similarite_genre = niveau;
+        if (film == null) {
+            return Float.MAX_VALUE;
         }
-               
-               if(film.getCouleur()==this.getCouleur()){
-                   similarite_couleur=0;
-               } else {similarite_couleur=1;}
 
-               int nombre_acteurs_total=this.getActeurs().size()+film.getActeurs().size();
-               int nombre_acteur_commun=0;
-               for(Acteur acteur : this.getActeurs()){
-                   for(Acteur acteur2 : film.getActeurs()){
-                       if(acteur.getNom().equalsIgnoreCase(acteur2.getNom()) && acteur.getPrenom().equalsIgnoreCase(acteur2.getPrenom())){
-                           nombre_acteur_commun=nombre_acteur_commun+1;
-                       }
-                   }
-               }
-
-               similarite_acteur=nombre_acteurs_total-nombre_acteur_commun;
-        return similarite_genre+similarite_couleur+similarite_acteur;
-              
-    }
-               
+        int similarite_genre;
+        int niveau = 0;
+        Genre genre1 = this.getGenre();
+        Genre genre2 = film.getGenre();
         
-    
+
+        while (genre1 != null || genre2 != null) {
+            if (genre1 != null && genre2 != null && genre1.getNom().equalsIgnoreCase(genre2.getNom())) {
+                similarite_genre = niveau; 
+                break;
+            }
+            if (genre1 != null) {
+                genre1 = genre1.getParent();}
+            if (genre2 != null) {
+                genre2 = genre2.getParent();}
+                niveau = niveau+1;
+        }
+        similarite_genre = niveau;
+
+
+        int similarite_couleur = (this.getCouleur() == film.getCouleur()) ? 0 : 1;
+        int nombre_acteurs_total = this.getActeurs().size() + film.getActeurs().size();
+        int nombre_acteur_commun = 0;
+         
+        for (Acteur acteur : this.getActeurs()) {
+            for (Acteur acteur2 : film.getActeurs()) {
+                if (acteur.getNom().equalsIgnoreCase(acteur2.getNom()) &&
+                    acteur.getPrenom().equalsIgnoreCase(acteur2.getPrenom())) {
+                    nombre_acteur_commun++;
+                }
+            }
+        }
+
+        int similarite_acteur = nombre_acteurs_total - nombre_acteur_commun;
+
+        return similarite_genre + similarite_couleur + similarite_acteur;
+    }
 
     @Override
     public String toString() {  
