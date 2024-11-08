@@ -156,28 +156,40 @@ public class VideoClub {
      */
     public List<Film> extraireFilmSimilaire(String titre) {
         List<Film> film_plus_similaire=new ArrayList<Film>();
-        List<Film> films = produits.stream()
+        List<Film> films;
+        List<Film> film_catalogue = produits.stream()
             .filter(produit -> produit instanceof Film)
             .map(produit -> (Film) produit)
             .collect(Collectors.toList());
             
-        Film monFilm= films.stream()
+        Film monFilm= film_catalogue.stream()
             .filter(film -> film.getTitre().equalsIgnoreCase(titre))
             .findFirst() 
             .orElse(null);
-        float[] tab= new float[films.size()];
-        for (Film f : films) {
-            tab[films.indexOf(f)]=monFilm.calculSimilarite(f);
-        }
-        Arrays.sort(tab);
-        for (int i = 0; i < Math.ceil(tab.length/2); i++) {
-            for (Film f : films) {
-                if (tab[i] == f.calculSimilarite(monFilm)) {
-                    film_plus_similaire.add(f);
-                }
+
+            if (monFilm != null) {
+                films = film_catalogue.stream()
+                    .filter(film -> !film.equals(monFilm)) // Exclure monFilm
+                    .collect(Collectors.toList());
+                    film_plus_similaire.add(monFilm);
+
+                    float[] tab= new float[films.size()];
+                    for (Film f : films) {
+                        tab[films.indexOf(f)]=monFilm.calculSimilarite(f);
+                    }
+                    Arrays.sort(tab);
+                    for (int i = 0; i < Math.round(tab.length/2); i++) {
+                        for (Film f : films) {
+                            if (tab[i] == f.calculSimilarite(monFilm)) {
+                                film_plus_similaire.add(f);
+                            }
+                        }
+                    }
+                    return film_plus_similaire;
             }
-        }
-        return film_plus_similaire;
+            else {
+                throw new IllegalArgumentException("Film introuvable");
+            }
     }
 
     /**
@@ -203,7 +215,7 @@ public class VideoClub {
             if (produitsLoues.isEmpty()) {
                 scoreDiversite = Double.MAX_VALUE; // Attribuer un score très élevé pour ceux sans films loués
             } else if (produitsLoues.size() == 1) {
-                scoreDiversite = film_louer_abonnee.get(0).calculSimilarite(film_louer_abonnee.get(0));
+                scoreDiversite = film_louer_abonnee.get(0).calculSimilarite(film_louer_abonnee.get(0))*1000;
             } else {
                 scoreDiversite = calculerScoreDiversite(film_louer_abonnee);
             }
@@ -358,10 +370,24 @@ public class VideoClub {
      * @return Liste de films similaires.
      */
     private List<Film> trouverFilmsSimilaires(Film film, List<Film> tousLesFilms) {
-        return tousLesFilms.stream()
+        List<Film> film_plus_similaire=new ArrayList<>();
+        List<Film> films ;
+        films = tousLesFilms.stream()
             .filter(f -> !f.equals(film)) // Exclure le film lui-même
-            .sorted(Comparator.comparingDouble(f -> film.calculSimilarite(f))) // Trier par similarité
             .collect(Collectors.toList()); // Collecter tous les films similaires sans limite
+                    float[] tab= new float[films.size()];
+                    for (Film f : films) {
+                        tab[films.indexOf(f)]=film.calculSimilarite(f);
+                    }
+                    Arrays.sort(tab);
+                    for (int i = 0; i < Math.round(tab.length/2); i++) {
+                        for (Film f : films) {
+                            if (tab[i] == f.calculSimilarite(film)) {
+                                film_plus_similaire.add(f);
+                            }
+                        }
+                    }
+                    return film_plus_similaire;
     }
     
     @Override

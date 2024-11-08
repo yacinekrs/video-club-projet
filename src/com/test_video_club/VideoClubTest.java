@@ -11,7 +11,7 @@ class VideoClubTest {
     private VideoClub videoClub;
     private Abonnee abonnee1, abonnee2;
     private Film film1, film2, film3;
-    private Coffret coffret1, coffret2;
+   
     private Genre genreAction, genreComedie;
     private List<Acteur> acteurs;
 
@@ -28,9 +28,7 @@ class VideoClubTest {
         film1 = new Film("Film Action", genreAction, acteurs, true);
         film2 = new Film("Film Comédie", genreComedie, acteurs, true);
         film3 = new Film("Autre Film Action", genreAction, acteurs, false);
-        
-        coffret1 = new Coffret("Coffret Action", genreAction, acteurs, true, Arrays.asList(film1, film3));
-        coffret2 = new Coffret("Coffret Comédie", genreComedie, acteurs, false, Arrays.asList(film1,film2));
+
     }
 
     @Test
@@ -61,7 +59,7 @@ class VideoClubTest {
     @Test
     void testAjouterFilmNull() {
         videoClub.ajouterFilm(null);
-        assertTrue(videoClub.extraireFilmSimilaire("Film Action").isEmpty());
+        assertThrows(IllegalArgumentException.class, () -> videoClub.extraireFilmSimilaire("Film Action"));
     }
 
     @Test
@@ -131,7 +129,19 @@ class VideoClubTest {
     }
 
     @Test
-    void testExtraireFilmsPublicType() {
+    void testExtraireFilmsPublicTypeAvecSeuilSup() {
+        videoClub.ajouterAbonnee(abonnee1);
+        videoClub.ajouterAbonnee(abonnee2);
+        videoClub.ajouterFilm(film1);
+        videoClub.ajouterFilm(film2);
+        videoClub.enregistrerPrets(abonnee1, film1);
+        videoClub.enregistrerPrets(abonnee2, film1);
+        List<Film> filmsPublicType = videoClub.extraireFilmsPublicType(2.5f);
+        assertTrue(filmsPublicType.contains(film1));
+    }
+
+    @Test
+    void testExtraireFilmsPublicTypeAvecSeuilInf() {
         videoClub.ajouterAbonnee(abonnee1);
         videoClub.ajouterAbonnee(abonnee2);
         videoClub.ajouterFilm(film1);
@@ -139,7 +149,7 @@ class VideoClubTest {
         videoClub.enregistrerPrets(abonnee1, film1);
         videoClub.enregistrerPrets(abonnee2, film1);
         List<Film> filmsPublicType = videoClub.extraireFilmsPublicType(0.5f);
-        assertTrue(filmsPublicType.contains(film1));
+        assertFalse(filmsPublicType.contains(film1));
     }
 
     @Test
