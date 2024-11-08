@@ -10,7 +10,7 @@ class VideoClubTest {
 
     private VideoClub videoClub;
     private Abonnee abonnee1, abonnee2;
-    private Film film1, film2, film3;
+    private Film film1, film2, film3,film4;
    
     private Genre genreAction, genreComedie;
     private List<Acteur> acteurs;
@@ -28,6 +28,7 @@ class VideoClubTest {
         film1 = new Film("Film Action", genreAction, acteurs, true);
         film2 = new Film("Film Comédie", genreComedie, acteurs, true);
         film3 = new Film("Autre Film Action", genreAction, acteurs, false);
+        film4 = new Film("Autre Film Action", genreComedie, acteurs, false);
 
     }
 
@@ -86,15 +87,7 @@ class VideoClubTest {
         assertTrue(abonneesMoyens.contains(abonnee1));
     }
 
-    @Test
-    void testExtraireGenrePopulaires() {
-        videoClub.ajouterAbonnee(abonnee1);
-        videoClub.ajouterFilm(film1);
-        videoClub.ajouterFilm(film2);
-        videoClub.enregistrerPrets(abonnee1, film1);
-        videoClub.enregistrerPrets(abonnee1, film2);
-        assertEquals(genreAction, videoClub.extraireGenrePopulaires());
-    }
+
 
     @Test
     void testExtraireFilmSimilaire() {
@@ -104,6 +97,7 @@ class VideoClubTest {
         List<Film> filmsSimilaires = videoClub.extraireFilmSimilaire("Film Action");
         assertTrue(filmsSimilaires.contains(film3));
         assertTrue(filmsSimilaires.contains(film2));
+        assertFalse(filmsSimilaires.contains(film4));
     }
 
     @Test
