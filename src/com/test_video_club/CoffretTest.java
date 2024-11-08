@@ -83,9 +83,5 @@ public class CoffretTest {
     Coffret coffret1 = new Coffret("titre1", genre, listeActeur, false, listeFilm);
     Float cal = coffret1.calculSimilarite(film2);
     assertEquals(7.0f, cal, 0);
-  }
-
-
- 
-
+  } 
 }
