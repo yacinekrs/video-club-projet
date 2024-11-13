@@ -10,13 +10,15 @@ import org.bson.types.ObjectId;
 public class VideoClub {
     private final List<ProduitVideo> produits;
     private final List<Abonnee> abonnees;
-    static MongoClient mongoClient ;
-    static MongoDatabase database;
-    static MongoCollection<Document> collection_coffret;
-    static MongoCollection<Document> collection_acteur;
-    static MongoCollection<Document> collection_film;
-    static MongoCollection<Document> collection_genre;
-    static MongoCollection<Document> collection_abonnee;
+    private static MongoClient mongoClient ;
+    private static MongoDatabase database;
+    private static MongoCollection<Document> collection_coffret;
+    private static MongoCollection<Document> collection_acteur;
+    private static MongoCollection<Document> collection_film;
+    private static MongoCollection<Document> collection_genre;
+    private static MongoCollection<Document> collection_abonnee;
+    private static final String MONGO_URI = "mongodb+srv://madiassalakamyd:uKp4gTCeI3EfcICl@cluster0.neped.mongodb.net/";
+    private static final String DB_NAME = "video_club_project";
 
     /**
      *  Constructeur pour creer un nouveau videoclub
@@ -48,7 +50,22 @@ public class VideoClub {
         }
         this.abonnees.add(abonnee);
     }
-
+    /**
+     * Retourne la liste des abonnées du VideoClub.
+     * 
+     * @return La liste des abonnées.
+     */
+    public List<Abonnee> getAbonnees() {
+        return abonnees;
+    }
+    /**
+     * Retourne la liste des produits du VideoClub.
+     * 
+     * @return La liste des produits.
+     */
+    public List<ProduitVideo> getProduits() {
+        return produits;
+    }
     /**
      * Recherche un abonné par son nom.
      *
@@ -410,10 +427,12 @@ public class VideoClub {
                     }
                     return film_plus_similaire;
     }
-    
+    /**
+     * Connexion à la base de données MongoDB et création des collections. 
+     */
     private static  void connectionMongodb(){
-           mongoClient = MongoClients.create("mongodb+srv://madiassalakamyd:uKp4gTCeI3EfcICl@cluster0.neped.mongodb.net/");
-           database = mongoClient.getDatabase("video_club_project");
+           mongoClient = MongoClients.create(MONGO_URI);
+           database = mongoClient.getDatabase(DB_NAME);
             collection_coffret= database.getCollection("Coffrets");
             collection_acteur= database.getCollection("Acteurs");
             collection_film= database.getCollection("Films");
@@ -422,9 +441,15 @@ public class VideoClub {
            System.out.println("Connexion à MongoDB réussie");
            
     }
+    /**
+     * Fermeture de la connexion à la base de données MongoDB.
+     */
     private static void endConnection(){ mongoClient.close();}
-
-    /*************la fonction de sauvegarde  */
+   /**
+    * Retourne la liste des ID des acteurs d'un produit video donné.
+    * @param produitVideo
+    * @return
+    */
     public List<ObjectId> getIdActeurs(ProduitVideo produitVideo){
         List<ObjectId> liste_id_acteurs=new ArrayList<>();
         for(Acteur acteur: produitVideo.getActeurs()){
@@ -440,6 +465,11 @@ public class VideoClub {
         }
         return liste_id_acteurs;
     }
+    /**
+     * Retourne l'ID du genre d'un film donné.
+     * @param genre_film
+     * @return
+     */
     public ObjectId getIdGenre(Document genre_film){
         Document docgenre = collection_genre.find(genre_film).first();
         ObjectId idgenre;
@@ -450,6 +480,12 @@ public class VideoClub {
         }
         return idgenre;
     }
+  /**
+   * Ajoute un document à une collection si il n'existe pas deja.
+   * @param isDocument
+   * @param document
+   * @param collection
+   */
     public void AddinDocuments(Document isDocument,Document document, List<Document> collection){
         if(isDocument != null){ 
             System.out.println("Cet abonnee existe deja!!!");
@@ -458,6 +494,9 @@ public class VideoClub {
             collection.add(document);
         }
     }
+    /**
+     * Sauvegarde toutes les données dans la base de données MongoDB.
+     */
     public void SauvegardeAll(){
         sauvegardeGenre();
         sauvegardeActeur();
@@ -465,6 +504,9 @@ public class VideoClub {
         sauvegardeCoffret();
         sauvegardeAbonnee();
     }
+    /**
+     * Sauvegarde des genres dans la base de données MongoDB.
+     */
     public void sauvegardeGenre(){
         connectionMongodb();
         Set<Genre> nos_genres = new HashSet<>();
@@ -492,6 +534,9 @@ public class VideoClub {
         
         endConnection();
     }
+   /**
+    * Sauvegarde des acteurs dans la base de données MongoDB.
+    */
     public void sauvegardeActeur(){
         connectionMongodb();
         Set<Acteur> nos_acteurs = new HashSet<>();
@@ -514,6 +559,9 @@ public class VideoClub {
         }
         endConnection();
     }
+   /**
+    * Sauvegarde des films dans la base de données MongoDB.
+    */
     public void sauvegardeFilm(){
         connectionMongodb();
         List<Film> films = produits.stream()
@@ -542,6 +590,9 @@ public class VideoClub {
       
         endConnection();
     }
+   /**
+    * Sauvegarde des abonnees dans la base de données MongoDB.
+    */
     public void sauvegardeAbonnee(){
         connectionMongodb();
         List<Document> documents = new ArrayList<>();
@@ -560,12 +611,11 @@ public class VideoClub {
                     } else {
                         throw new NullPointerException("pas de film trouver");
                     }
-                } 
-                if(produit instanceof Coffret){
+                } else if(produit instanceof Coffret){
                     Document coffret_g = new Document("titre",((Coffret)produit).getTitre())
                                         .append("bonus",((Coffret)produit).isAbonus());
-                    Document genre_film = new Document("nom",((Coffret)produit).getGenre().getNom());
-                    ObjectId idgenre = getIdGenre(genre_film);
+                    Document genre_coffret = new Document("nom",((Coffret)produit).getGenre().getNom());
+                    ObjectId idgenre = getIdGenre(genre_coffret);
                     coffret_g.append("genre",idgenre);
                     Document docCoffret = collection_coffret.find(coffret_g).first();
                     if(docCoffret!=null){
@@ -573,6 +623,8 @@ public class VideoClub {
                     } else {
                         throw new NullPointerException("pas de coffret trouver");
                     }
+                }else{
+                    throw new NullPointerException("pas de produit trouver");
                 }
             }
             Document abonnee_g = new Document("nom",abonnee.getNom())
@@ -594,13 +646,15 @@ public class VideoClub {
         }
         endConnection();
     }
+   /**
+    * Sauvegarde des coffrets dans la base de données MongoDB.
+    */
     public void sauvegardeCoffret(){
         connectionMongodb();
         List<Coffret> coffrets = produits.stream()
                 .filter(produit -> produit instanceof Coffret)
                 .map(produit -> (Coffret) produit)
                 .collect(Collectors.toList());
-
         List<Document> documents = new ArrayList<>();
         for (Coffret coffret : coffrets) {
             List<ObjectId> liste_id_acteurs= getIdActeurs(coffret);
@@ -618,7 +672,6 @@ public class VideoClub {
                     throw new NullPointerException("pas de film trouver");
                 }
             }
-
             Document genre_coffret = new Document("nom",coffret.getGenre().getNom());
             ObjectId idgenre = getIdGenre(genre_coffret);
             Document coffret_g = new Document("titre",coffret.getTitre())
@@ -643,114 +696,69 @@ public class VideoClub {
         
         endConnection();
     }
-/******************fin de la foncion de sauvegarde */
-/******debut fonction de chargement ******/
-public static VideoClub chargementAll(){
-    connectionMongodb();
-    List<Abonnee> liste_abonnnee=chargementAbonnees();
-    List<Film> liste_Film=chargementFilms();
-    List<Coffret> liste_coffret=chargementCoffrets();
-    List<ProduitVideo> liste_ProduitVideos=new ArrayList<>();
-    for(Film film:liste_Film){
-        liste_ProduitVideos.add(film);
+    /**
+     * Chargement de la base de données MongoDB.
+     * @return VideoClub
+     */
+    public static VideoClub chargementAll(){
+        connectionMongodb();
+        List<Abonnee> liste_abonnnee=chargementAbonnees();
+        List<Film> liste_Film=chargementFilms();
+        List<Coffret> liste_coffret=chargementCoffrets();
+        List<ProduitVideo> liste_ProduitVideos=new ArrayList<>();
+        for(Film film:liste_Film){
+            liste_ProduitVideos.add(film);
+        }
+        for(Coffret cofret:liste_coffret){
+            liste_ProduitVideos.add(cofret);
+        }
+        endConnection();
+    return new VideoClub(liste_ProduitVideos,liste_abonnnee);
     }
-    for(Coffret cofret:liste_coffret){
-        liste_ProduitVideos.add(cofret);
-    }
-    endConnection();
-  return new VideoClub(liste_ProduitVideos,liste_abonnnee);
-}
-public static List<Genre> chargementGenres(){
-   
-    List<Genre> genres = new ArrayList<>();
-    for (Document doc : collection_genre.find()) {
-        String nom = doc.getString("nom");
-        String parentNom = doc.getString("parent");
-        Genre parent = parentNom != null ? new Genre(parentNom, null) : null;
-        genres.add(new Genre(nom, parent));
-    }
+    /**
+     * Chargement des genres de la base de données MongoDB.
+     * @return une liste de genres
+     */
+    public static List<Genre> chargementGenres(){
     
-    return genres;
-}
-public static List<Acteur> chargementActeurs(){
-       List<Acteur> acteurs = new ArrayList<>();
-       for (Document doc : collection_acteur.find()) {
-           String nom = doc.getString("nom");
-           String prenom = doc.getString("prenom");
-           acteurs.add(new Acteur(nom, prenom));
-       }
-       return acteurs;
-}
-public static List<Film> chargementFilms(){
-    List<Genre> genres = chargementGenres();
-    List<Film> films = new ArrayList<>();
-    for (Document doc : collection_film.find()) {
-        String titre = doc.getString("titre");
-        Genre genreFilm = sousChargementGenreProduit(doc, genres);
-        if(genreFilm == null){
-            throw new NullPointerException("L'objet genre de film est null");
+        List<Genre> genres = new ArrayList<>();
+        for (Document doc : collection_genre.find()) {
+            String nom = doc.getString("nom");
+            String parentNom = doc.getString("parent");
+            Genre parent = parentNom != null ? new Genre(parentNom, null) : null;
+            genres.add(new Genre(nom, parent));
         }
-        List<Acteur> acteursDuFilm = new ArrayList<>();
-        List<ObjectId> acteurIds = doc.getList("acteurs", ObjectId.class);
-        for (ObjectId acteurId : acteurIds) {
-            Document acteurDoc = collection_acteur.find(new Document("_id", acteurId)).first();
-            if (acteurDoc != null) {
-                String nomActeur = acteurDoc.getString("nom");
-                String prenomActeur = acteurDoc.getString("prenom");
-                acteursDuFilm.add(new Acteur(nomActeur, prenomActeur));
-            }
-        }
-
-        boolean couleur = doc.getBoolean("couleur");
-        films.add(new Film(titre, genreFilm, acteursDuFilm, couleur));
+        
+        return genres;
     }
-    return films;
-}
-public static Genre sousChargementGenreProduit(Document produit, List<Genre> genres){
-    ObjectId genre_produit_id = produit.getObjectId("genre");
-    Document d_genre = collection_genre.find(new Document("_id",genre_produit_id)).first();
-    for(Genre genre : genres){
-        if(genre.getNom().equalsIgnoreCase(d_genre.getString("nom"))){
-            return genre;
+    /**
+     * Chargement des acteurs de la base de données MongoDB.
+     * @return une liste d'acteurs
+     */
+    public static List<Acteur> chargementActeurs(){
+        List<Acteur> acteurs = new ArrayList<>();
+        for (Document doc : collection_acteur.find()) {
+            String nom = doc.getString("nom");
+            String prenom = doc.getString("prenom");
+            acteurs.add(new Acteur(nom, prenom));
         }
+        return acteurs;
     }
-    return null;
-}
-public static List<Coffret> chargementCoffrets(){
-List<Coffret> coffrets = new ArrayList<>();
-List<Genre> genres=chargementGenres();
-for (Document doc : collection_coffret.find()) {
-    String titre = doc.getString("titre");
-    Genre genreCoffret = sousChargementGenreProduit(doc, genres);
-     if(genreCoffret==null){
-        throw new NullPointerException("L'objet genre de coffret est null");
-     }
-        List<Acteur> acteursDucoffret = new ArrayList<>();
-        List<ObjectId> acteurIds_coffret = doc.getList("acteurs", ObjectId.class);
-        for (ObjectId acteurId : acteurIds_coffret) {
-            Document acteurDocCoffret = collection_acteur.find(new Document("_id", acteurId)).first();
-            if (acteurDocCoffret != null) {
-                String nomActeur = acteurDocCoffret.getString("nom");
-                String prenomActeur = acteurDocCoffret.getString("prenom");
-                acteursDucoffret.add(new Acteur(nomActeur, prenomActeur));
+    /**
+     * Chargement des films de la base de données MongoDB.
+     * @return une liste de films
+     */
+    public static List<Film> chargementFilms(){
+        List<Genre> genres = chargementGenres();
+        List<Film> films = new ArrayList<>();
+        for (Document doc : collection_film.find()) {
+            String titre = doc.getString("titre");
+            Genre genreFilm = sousChargementGenreProduit(doc, genres);
+            if(genreFilm == null){
+                throw new NullPointerException("L'objet genre de film est null");
             }
-        }
-    boolean abonus = doc.getBoolean("bonus");
-
-    // Récupération des films associés au coffret
-    List<Film> filmsDuCoffret = new ArrayList<>();
-    List<ObjectId> filmIds = doc.getList("films", ObjectId.class); // Utilisation de getList pour récupérer les ObjectId
-    for (ObjectId filmId : filmIds) {
-        Document filmDoc = collection_film.find(new Document("_id", filmId)).first();
-        if (filmDoc != null) {
-            String titreFilm = filmDoc.getString("titre");
-            Genre genreFilm = sousChargementGenreProduit(filmDoc, genres);
-            if(genreFilm==null){
-                throw new NullPointerException("un genre des film du  coffret est null");
-             }
-            
             List<Acteur> acteursDuFilm = new ArrayList<>();
-            List<ObjectId> acteurIds = filmDoc.getList("acteurs", ObjectId.class); // Récupérer les acteurs
+            List<ObjectId> acteurIds = doc.getList("acteurs", ObjectId.class);
             for (ObjectId acteurId : acteurIds) {
                 Document acteurDoc = collection_acteur.find(new Document("_id", acteurId)).first();
                 if (acteurDoc != null) {
@@ -760,126 +768,266 @@ for (Document doc : collection_coffret.find()) {
                 }
             }
 
-            boolean couleurFilm = filmDoc.getBoolean("couleur");
-            filmsDuCoffret.add(new Film(titreFilm, genreFilm, acteursDuFilm, couleurFilm));
+            boolean couleur = doc.getBoolean("couleur");
+            films.add(new Film(titre, genreFilm, acteursDuFilm, couleur));
         }
+        return films;
+    }
+    /**
+     * Chargement du genre d'un produit de la base de données MongoDB.
+     * @param produit
+     * @param genres
+     * @return
+     */
+    public static Genre sousChargementGenreProduit(Document produit, List<Genre> genres){
+        ObjectId genre_produit_id = produit.getObjectId("genre");
+        Document d_genre = collection_genre.find(new Document("_id",genre_produit_id)).first();
+        for(Genre genre : genres){
+            if(genre.getNom().equalsIgnoreCase(d_genre.getString("nom"))){
+                return genre;
+            }
+        }
+        return null;
+    }
+    /**
+     * Chargement des coffrets de la base de données MongoDB.
+     * @return une liste de coffrets
+     */
+    public static List<Coffret> chargementCoffrets(){
+    List<Coffret> coffrets = new ArrayList<>();
+    List<Genre> genres=chargementGenres();
+    for (Document doc : collection_coffret.find()) {
+        String titre = doc.getString("titre");
+        Genre genreCoffret = sousChargementGenreProduit(doc, genres);
+        if(genreCoffret==null){
+            throw new NullPointerException("L'objet genre de coffret est null");
+        }
+            List<Acteur> acteursDucoffret = new ArrayList<>();
+            List<ObjectId> acteurIds_coffret = doc.getList("acteurs", ObjectId.class);
+            for (ObjectId acteurId : acteurIds_coffret) {
+                Document acteurDocCoffret = collection_acteur.find(new Document("_id", acteurId)).first();
+                if (acteurDocCoffret != null) {
+                    String nomActeur = acteurDocCoffret.getString("nom");
+                    String prenomActeur = acteurDocCoffret.getString("prenom");
+                    acteursDucoffret.add(new Acteur(nomActeur, prenomActeur));
+                }
+            }
+        boolean abonus = doc.getBoolean("bonus");
+
+        // Récupération des films associés au coffret
+        List<Film> filmsDuCoffret = new ArrayList<>();
+        List<ObjectId> filmIds = doc.getList("films", ObjectId.class); // Utilisation de getList pour récupérer les ObjectId
+        for (ObjectId filmId : filmIds) {
+            Document filmDoc = collection_film.find(new Document("_id", filmId)).first();
+            if (filmDoc != null) {
+                String titreFilm = filmDoc.getString("titre");
+                Genre genreFilm = sousChargementGenreProduit(filmDoc, genres);
+                if(genreFilm==null){
+                    throw new NullPointerException("un genre des film du  coffret est null");
+                }
+                
+                List<Acteur> acteursDuFilm = new ArrayList<>();
+                List<ObjectId> acteurIds = filmDoc.getList("acteurs", ObjectId.class); // Récupérer les acteurs
+                for (ObjectId acteurId : acteurIds) {
+                    Document acteurDoc = collection_acteur.find(new Document("_id", acteurId)).first();
+                    if (acteurDoc != null) {
+                        String nomActeur = acteurDoc.getString("nom");
+                        String prenomActeur = acteurDoc.getString("prenom");
+                        acteursDuFilm.add(new Acteur(nomActeur, prenomActeur));
+                    }
+                }
+
+                boolean couleurFilm = filmDoc.getBoolean("couleur");
+                filmsDuCoffret.add(new Film(titreFilm, genreFilm, acteursDuFilm, couleurFilm));
+            }
+
+        }
+        // Créer le coffret avec les films récupérés
+        Coffret coffret = new Coffret(titre, genreCoffret, acteursDucoffret, abonus, filmsDuCoffret);
+        coffrets.add(coffret);
+    }
+    return coffrets;
 
     }
-    // Créer le coffret avec les films récupérés
-    Coffret coffret = new Coffret(titre, genreCoffret, acteursDucoffret, abonus, filmsDuCoffret);
-    coffrets.add(coffret);
-}
-return coffrets;
 
-}
+    /**
+     * Charge la liste des abonnés à partir de la base de données.
+     * 
+     * @return Une liste d'objets Abonnee contenant tous les abonnés chargés
+     */
+    public static List<Abonnee> chargementAbonnees() {
+        List<Genre> genres = chargementGenres();
+        List<Acteur> acteurs_all = chargementActeurs();
+        List<Film> film_all = chargementFilms();
+        List<Abonnee> liste_abonnees = new ArrayList<>();
 
-public static List<Abonnee> chargementAbonnees(){
-    List<Genre> genres = chargementGenres(); 
-    List<Acteur> acteurs_all = chargementActeurs(); 
-    List<Film> film_all = chargementFilms(); 
-    List<Abonnee> liste_abonnees = new ArrayList<>();
-    for (Document doc : collection_abonnee.find()) {
-        String nomAbonnee = doc.getString("nom");
-        String prenomAbonnee = doc.getString("prenom");
-        int ageAbonnee = doc.getInteger("age");
-        String sexeAbonneeStr = doc.getString("sexe");
-        double revenuAbonnee = doc.getDouble("revenu");
-        Abonnee abonnee = new Abonnee(nomAbonnee, prenomAbonnee, ageAbonnee, sexeAbonneeStr, revenuAbonnee);
-        List<ProduitVideo>  produitsLoues= new ArrayList<>();
-        List<ObjectId> produitIds = doc.getList("produit_louer", ObjectId.class); 
+        for (Document doc : collection_abonnee.find()) {
+            Abonnee abonnee = creerAbonnee(doc);
+            List<ProduitVideo> produitsLoues = chargerProduitsLoues(doc, genres, acteurs_all, film_all);
+            
+            for (ProduitVideo prod : produitsLoues) {
+                abonnee.louerProduit(prod);
+            }
+            liste_abonnees.add(abonnee);
+        }
+        return liste_abonnees;
+    }
+
+    /**
+     * Crée un objet Abonnee à partir d'un document Abonnee de la base de données MongoDB .
+     *
+     * @param doc Le document MongoDB contenant les informations de l'abonné
+     * @return Un nouvel objet Abonnee
+     */
+    private static Abonnee creerAbonnee(Document doc) {
+        return new Abonnee(
+            doc.getString("nom"),
+            doc.getString("prenom"),
+            doc.getInteger("age"),
+            doc.getString("sexe"),
+            doc.getDouble("revenu")
+        );
+    }
+
+    /**
+     * Charge les produits loués par un abonné.
+     *
+     * @param doc Le document MongoDB de l'abonné
+     * @param genres La liste de tous les genres
+     * @param acteurs_all La liste de tous les acteurs
+     * @param film_all La liste de tous les films
+     * @return Une liste de ProduitVideo loués par l'abonné
+     */
+    private static List<ProduitVideo> chargerProduitsLoues(Document doc, List<Genre> genres, List<Acteur> acteurs_all, List<Film> film_all) {
+        List<ProduitVideo> produitsLoues = new ArrayList<>();
+        List<ObjectId> produitIds = doc.getList("produit_louer", ObjectId.class);
+
         for (ObjectId produitId : produitIds) {
-            Document produitDoc = collection_film.find(new Document("_id", produitId)).first();
-            if (produitDoc != null) {
-               sousChargementAbonnee(produitDoc, produitsLoues, genres, acteurs_all,null);
-            }else{
-                System.out.println("le produit pour le chargement n'est pas dans film !!!");
-            }
-            Document produitDocc = collection_coffret.find(new Document("_id", produitId)).first();
-            if(produitDocc!=null){
-                Coffret coffret=new Coffret(null, null, acteurs_all, false, null);
-                sousChargementAbonnee(produitDocc, produitsLoues, genres, acteurs_all, coffret);
-
-                List<Film> film_coffret=new ArrayList<>();  // les films du coffrets
-                List<ObjectId> id_films = produitDocc.getList("films", ObjectId.class);
-                for(ObjectId idfilm:id_films){
-                  Document  films_doc=collection_film.find(new Document("_id", idfilm)).first();
-                  if(films_doc!=null){
-                      for(Film film_one:film_all){
-                        if(film_one.getTitre().equalsIgnoreCase(films_doc.getString("titre"))
-                        && film_one.getCouleur()==films_doc.getBoolean("couleur")){
-                            film_coffret.add(film_one);
-                        }
-                      }
-                  }else{
-                      System.out.println("Ces films n'existe pas dans la base lors du chargement !!!");
-                      return null;
-                  }
-                }  
-             produitsLoues.add(new Coffret(produitDocc.getString("titre"),coffret.getGenre(),coffret.getActeurs(),produitDocc.getBoolean("bonus"),film_coffret));
-            }else{
-                System.out.println("le produit pour le chargement n'est pas dans coffret !!!");
+            ProduitVideo produit = chargerProduit(produitId, genres, acteurs_all, film_all);
+            if (produit != null) {
+                produitsLoues.add(produit);
             }
         }
-        for(ProduitVideo prod:produitsLoues){
-            abonnee.louerProduit(prod);
+        return produitsLoues;
+    }
+
+    /**
+     * Charge un produit vidéo (film ou coffret) à partir de son ID.
+     *
+     * @param produitId L'ID du produit à charger
+     * @param genres La liste de tous les genres
+     * @param acteurs_all La liste de tous les acteurs
+     * @param film_all La liste de tous les films
+     * @return Un objet ProduitVideo (Film ou Coffret) ou null si non trouvé
+     */
+    private static ProduitVideo chargerProduit(ObjectId produitId, List<Genre> genres, List<Acteur> acteurs_all, List<Film> film_all) {
+        Document produitDoc = collection_film.find(new Document("_id", produitId)).first();
+        if (produitDoc != null) {
+            return chargerFilm(produitDoc, genres, acteurs_all);
         }
-        liste_abonnees.add(abonnee);
+
+        produitDoc = collection_coffret.find(new Document("_id", produitId)).first();
+        if (produitDoc != null) {
+            return chargerCoffret(produitDoc, genres, acteurs_all, film_all);
+        }
+
+        System.out.println("Le produit pour le chargement n'est ni dans film ni dans coffret !!! " + produitId);
+        return null;
     }
-    return liste_abonnees;
+
+    /**
+     * Charge un film à partir d'un document MongoDB.
+     *
+     * @param produitDoc Le document MongoDB du film
+     * @param genres La liste de tous les genres
+     * @param acteurs_all La liste de tous les acteurs
+     * @return Un objet Film
+     */
+    private static Film chargerFilm(Document produitDoc, List<Genre> genres, List<Acteur> acteurs_all) {
+        Genre genre = trouverGenre(produitDoc.getObjectId("genre"), genres);
+        List<Acteur> acteurs = trouverActeurs(produitDoc.getList("acteurs", ObjectId.class), acteurs_all);
+        
+        return new Film(produitDoc.getString("titre"), genre, acteurs, produitDoc.getBoolean("couleur"));
+    }
+
+    /**
+     * Charge un coffret à partir d'un document MongoDB.
+     *
+     * @param produitDoc Le document MongoDB du coffret
+     * @param genres La liste de tous les genres
+     * @param acteurs_all La liste de tous les acteurs
+     * @param film_all La liste de tous les films
+     * @return Un objet Coffret
+     */
+    private static Coffret chargerCoffret(Document produitDoc, List<Genre> genres, List<Acteur> acteurs_all, List<Film> film_all) {
+        Genre genre = trouverGenre(produitDoc.getObjectId("genre"), genres);
+        List<Film> films_coffret = trouverFilms(produitDoc.getList("films", ObjectId.class), film_all);
+        
+        return new Coffret(produitDoc.getString("titre"), genre, acteurs_all, produitDoc.getBoolean("bonus"), films_coffret);
+    }
+
+    /**
+     * Trouve un genre à partir de son ID.
+     *
+     * @param genreId L'ID du genre à trouver
+     * @param genres La liste de tous les genres
+     * @return Le Genre correspondant ou null si non trouvé
+     */
+    private static Genre trouverGenre(ObjectId genreId, List<Genre> genres) {
+        Document genre_doc = collection_genre.find(new Document("_id", genreId)).first();
+        if (genre_doc == null) {
+            System.out.println("Ce film n'a pas de genre pour le chargement !!!");
+            return null;
+        }
+        return genres.stream()
+                    .filter(g -> g.getNom().equalsIgnoreCase(genre_doc.getString("nom")))
+                    .findFirst()
+                    .orElse(null);
+    }
+
+    /**
+     * Trouve les acteurs correspondant à une liste d'IDs.
+     *
+     * @param acteurIds La liste des IDs des acteurs à trouver
+     * @param acteurs_all La liste de tous les acteurs
+     * @return Une liste d'Acteur correspondant aux IDs fournis
+     */
+    private static List<Acteur> trouverActeurs(List<ObjectId> acteurIds, List<Acteur> acteurs_all) {
+        return acteurIds.stream()
+                        .map(id -> collection_acteur.find(new Document("_id", id)).first())
+                        .filter(Objects::nonNull)
+                        .flatMap(acteur_doc -> acteurs_all.stream()
+                            .filter(a -> a.getNom().equalsIgnoreCase(acteur_doc.getString("nom"))
+                                    && a.getPrenom().equalsIgnoreCase(acteur_doc.getString("prenom"))))
+                        .collect(Collectors.toList());
+    }
+
+    /**
+     * Trouve les films correspondant à une liste d'IDs.
+     *
+     * @param filmIds La liste des IDs des films à trouver
+     * @param film_all La liste de tous les films
+     * @return Une liste de Film correspondant aux IDs fournis
+     */
+    private static List<Film> trouverFilms(List<ObjectId> filmIds, List<Film> film_all) {
+    return filmIds.stream()
+                  .map(id -> collection_film.find(new Document("_id", id)).first())
+                  .filter(Objects::nonNull)
+                  .flatMap(film_doc -> film_all.stream()
+                      .filter(f -> f.getTitre().equalsIgnoreCase(film_doc.getString("titre"))
+                                && f.getCouleur() == film_doc.getBoolean("couleur")))
+                  .collect(Collectors.toList());
 }
-
-public static void sousChargementAbonnee(Document produitDoc, List<ProduitVideo>  produitsLoues,List<Genre> genres,List<Acteur> acteurs_all,Coffret coffret){
-    ObjectId id_genre = produitDoc.getObjectId("genre");
-    Document  genre_doc = collection_genre.find(new Document("_id", id_genre)).first();
-    Genre genre_film = null; // genre du film
-    if(genre_doc != null){
-      for (Genre g : genres){
-          if(g.getNom().equalsIgnoreCase(genre_doc.getString("nom"))){
-              genre_film=g;
-              break;
-          }
-      }
-    }else{
-      System.out.println("ce film na pas de genre pour le chargement!!!");
-      return; // a revenir dessus 
-    }
-    List<Acteur> acteur_film=new ArrayList<>();  // les acteurs du film
-    List<ObjectId> id_acteurs = produitDoc.getList("acteurs", ObjectId.class);
-    for(ObjectId idacteur:id_acteurs){
-      Document  acteurs_doc=collection_acteur.find(new Document("_id", idacteur)).first();
-      if(acteurs_doc!=null){
-          for(Acteur acteur_one:acteurs_all){
-              if(acteur_one.getNom().equalsIgnoreCase(acteurs_doc.getString("nom"))
-              && acteur_one.getPrenom().equalsIgnoreCase(acteurs_doc.getString("prenom"))){
-                  acteur_film.add(acteur_one);
-              }
-          }
-      }else{
-          System.out.println("Ces acteurs n'existe pas dans la base lors du chargement !!!");
-          return;
-      }
-    }
-    if(coffret==null)
-    produitsLoues.add(new Film(produitDoc.getString("titre"),genre_film,acteur_film,produitDoc.getBoolean("couleur")));
-    else{
-        coffret=new Coffret(produitDoc.getString("titre"), genre_film, acteurs_all, false, null);
-    }
-}
-
-
-/*******fin de la fonction de chargement *******/
     @Override
     public String toString() {
         return "VideoClub [produits=" + produits + ", abonnees=" + abonnees + "]";
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof VideoClub videoClub)) return false;
         return Objects.equals(produits, videoClub.produits) && Objects.equals(abonnees, videoClub.abonnees);
     }
-
     @Override
     public int hashCode() {
         return Objects.hash(produits, abonnees);

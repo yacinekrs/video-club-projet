@@ -1,11 +1,14 @@
 package com.location_video_club;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class App {
     public static void main(String[] args) {
-        VideoClub club = new VideoClub();
+        /**
+         * Initialisation du VideoClub et ajout des films et coffrets dans le videoclub 
+         * et des abonnés et sauvegarde des données dans la base de données
+         */
+       VideoClub club = new VideoClub();
         Genre genreAction=new Genre("Action", null);
         Film film1 = new Film("Inception", new Genre("Action",null), Arrays.asList(new Acteur("DiCaprio", "Leonardo")), true);
         Film film2 = new Film("The Godfather", new Genre("comedie",null), Arrays.asList(new Acteur("Pacino", "Al")), false);
@@ -27,15 +30,16 @@ public class App {
         abonne1.louerProduit(coffret1);
 
         // Sauvegarde des données dans MongoDB
-        club.sauvegardeGenre();
-        club.sauvegardeActeur();
-        club.sauvegardeFilm();
-        club.sauvegardeAbonnee();
-        club.sauvegardeCoffret();
-        System.out.println("Opérations terminées.");   
+        club.SauvegardeAll();
+        System.out.println("Opérations terminées.");  
 
-       /* VideoClub BOOOMS=VideoClub.chargementAll();
-        System.out.println(BOOOMS.toString());*/
+
+        /**
+         * partie 2 pour charger la base de données de mongodb 
+         */
+       VideoClub BOOOMS=VideoClub.chargementAll();
+       System.out.println(BOOOMS.getAbonnees());
+    
       
     
 
