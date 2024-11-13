@@ -1,6 +1,7 @@
 package com.location_video_club;
 import java.util.*;
 import java.util.stream.Collectors;
+
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
@@ -159,26 +160,26 @@ public class VideoClub {
      *
      * @return Le genre le plus fréquemment loué par les abonnés.
      */
-    public Genre extraireGenrePopulaires() {
+    public List<Genre> extraireGenrePopulaires() {
         Map<Genre, Integer> compteur = new HashMap<>();
-        int maxNb = 0;
-        Genre genrePopulaire = null;
+    
+        List<Genre> genrePopulaire = new ArrayList<>();
 
         for (Abonnee a : abonnees) {
             List<ProduitVideo> listProduitsVideo = a.getProduits();
 
-            // Parcourt chaque produit vidéo loué par cet abonné
             for (ProduitVideo produit : listProduitsVideo) {
                 // Récupère le genre du produit vidéo et incrémente son compteur dans la map
                 Genre genre = produit.getGenre();
                 compteur.put(genre, compteur.getOrDefault(genre, 0) + 1);
             }
         }
-
+        int maxNb = Collections.max(compteur.values());
+   
         for (Map.Entry<Genre, Integer> entry : compteur.entrySet()) {
-            if (entry.getValue() > maxNb) {
+            if (entry.getValue() == maxNb) {
                 maxNb = entry.getValue();
-                genrePopulaire = entry.getKey();
+                genrePopulaire.add(entry.getKey());
             }
         }
         return genrePopulaire;
@@ -245,9 +246,9 @@ public class VideoClub {
         for (Abonnee abonnee : abonnees) {
             List<ProduitVideo> produitsLoues = abonnee.getProduits();
             List<Film> film_louer_abonnee = produitsLoues.stream()
-                                .filter(produit -> produit instanceof Film)
-                                .map(produit -> (Film) produit)
-                                .collect(Collectors.toList());
+                .filter(produit -> produit instanceof Film)
+                .map(produit -> (Film) produit)
+                .collect(Collectors.toList());
             double scoreDiversite;
             
             if (produitsLoues.isEmpty()) {

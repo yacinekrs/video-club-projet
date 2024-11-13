@@ -184,8 +184,8 @@ public class Abonnee {
     public float calculerSimilarite(Abonnee autreAbonnee) {
         float simAge = (float) Math.abs(this.age - autreAbonnee.age) / 10 ;
         float simSexe = this.sexe.equals(autreAbonnee.sexe)? 0 : 1;
-
         float simTranche = 0;
+        
         if ((this.fourchette == Fourchette.Faible && autreAbonnee.fourchette == Fourchette.Elevee) ||
                 (this.fourchette == Fourchette.Elevee && autreAbonnee.fourchette == Fourchette.Faible)) {
             simTranche = 1;

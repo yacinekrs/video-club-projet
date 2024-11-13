@@ -6,6 +6,7 @@ public class Genre {
     private static final Genre GENRE_PARENT = new Genre("Genre", null); // Parent par défaut pour Action et Comédie
     private final String nom;
     private final Genre parent;
+    
     /**
      *
      * @param nom nom le nom du genre (ex: "Aventure", "Comédie").
@@ -13,6 +14,10 @@ public class Genre {
      * @throws IllegalArgumentException si les conditions de création du genre ne sont pas respectées.
      */
     public Genre(final String nom, final Genre parent) {
+
+        if (nom == null || nom.trim().isEmpty()) { // Vérifie si le nom est null ou une chaîne vide
+            throw new IllegalArgumentException("Le nom du genre ne peut pas être null ou vide.");
+        }
 
         // Si 'Action' ou 'Comédie' est créé avec un parent différent de 'Genre', corriger et avertir.
         if (("Action".equalsIgnoreCase(nom) || "Comédie".equalsIgnoreCase(nom)) && !GENRE_PARENT.equals(parent)) {
